@@ -10,14 +10,11 @@ import CoreBluetooth
 
 class L2CapPeripheral: NSObject {
     
-    public var poweredOn: Bool {
-        get {
-            return self.peripheralManager.state == .poweredOn
+    public var publish: Bool = false {
+        didSet {
+            self.publishService()
         }
     }
-    
-    public var stateCallback: ((CBManagerState)->Void)?
-    public var channelOpenCallback: ((Result<CBL2CAPChannel,Error>)->Void)?
     
     private var service: CBMutableService
     private var characteristic: CBMutableCharacteristic
@@ -26,36 +23,41 @@ class L2CapPeripheral: NSObject {
     private var channel: CBL2CAPChannel?
     private var channelPSM: UInt16?
     private var managerQueue = DispatchQueue.global(qos: .utility)
+    private var connectionHandler: L2CapConnectionCallback
     
-    
-    override init() {
+    init(connectionHandler:  @escaping L2CapConnectionCallback) {
         
         self.service = CBMutableService(type: Constants.serviceID, primary: true)
         self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
+        self.connectionHandler = connectionHandler
         super.init()
         self.service.characteristics = [self.characteristic]
         self.peripheralManager = CBPeripheralManager(delegate: self, queue: managerQueue)
-
-        
     }
     
-    func publish() -> Bool {
-        guard peripheralManager.state == .poweredOn else {
-            return false
+    private func publishService() {
+        guard peripheralManager.state == .poweredOn, publish else {
+            self.unpublishService()
+            return
         }
         
         self.peripheralManager.add(self.service)
         self.peripheralManager.publishL2CAPChannel(withEncryption: false)
         self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.serviceID]])
         
-        return true
+    }
+    
+    private func unpublishService() {
+        self.peripheralManager.stopAdvertising()
     }
 }
 
 extension L2CapPeripheral: CBPeripheralManagerDelegate {
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        self.stateCallback?(peripheral.state)
+        if peripheral.state == .poweredOn {
+            self.publishService()
+        }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
@@ -96,11 +98,12 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         
         if let error = error {
             print("Error opening channel: \(error.localizedDescription)")
-            self.channelOpenCallback?(Result.failure(error))
+           return
         }
         self.channel = channel
         if let channel = self.channel {
-            self.channelOpenCallback?(Result.success(channel))
+            let connection = L2CapPeripheralConnection(channel: channel)
+            self.connectionHandler(connection)
         }
     }
     

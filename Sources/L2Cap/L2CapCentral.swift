@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class L2Central: NSObject {
+class L2CapCentral: NSObject {
 
     private var managerQueue = DispatchQueue.global(qos: .utility)
     
@@ -49,7 +49,7 @@ class L2Central: NSObject {
     }
 }
 
-extension L2Central: CBCentralManagerDelegate {
+extension L2CapCentral: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             self.startStopScanning()

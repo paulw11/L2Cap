@@ -25,7 +25,7 @@ public class L2CapCentral: NSObject {
     private var pendingConnections = Dictionary<String,L2CapConnection>()
   
     
-    override init() {
+    override public init() {
         super.init()
          self.central = CBCentralManager(delegate: self, queue: nil)
     }

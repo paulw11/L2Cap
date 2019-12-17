@@ -25,7 +25,11 @@ public class L2CapPeripheral: NSObject {
     private var managerQueue = DispatchQueue.global(qos: .utility)
     private var connectionHandler: L2CapConnectionCallback
     
-    init(connectionHandler:  @escaping L2CapConnectionCallback) {
+    public override init() {
+        fatalError("Call init(connectionHandler:)")
+    }
+    
+    public init(connectionHandler:  @escaping L2CapConnectionCallback) {
         
         self.service = CBMutableService(type: Constants.serviceID, primary: true)
         self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )

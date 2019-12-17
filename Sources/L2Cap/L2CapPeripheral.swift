@@ -8,7 +8,7 @@
 
 import CoreBluetooth
 
-class L2CapPeripheral: NSObject {
+public class L2CapPeripheral: NSObject {
     
     public var publish: Bool = false {
         didSet {

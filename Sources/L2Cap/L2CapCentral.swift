@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class L2CapCentral: NSObject {
+public class L2CapCentral: NSObject {
 
     private var managerQueue = DispatchQueue.global(qos: .utility)
     

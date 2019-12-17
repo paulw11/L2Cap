@@ -54,19 +54,19 @@ public class L2CapPeripheral: NSObject {
 
 extension L2CapPeripheral: CBPeripheralManagerDelegate {
     
-    func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+    public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         if peripheral.state == .poweredOn {
             self.publishService()
         }
     }
     
-    func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+    public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
         var centrals = self.subscribedCentrals[characteristic, default: [CBCentral]()]
         centrals.append(central)
         self.subscribedCentrals[characteristic]  = centrals
     }
     
-    func peripheralManager(_ peripheral: CBPeripheralManager, didPublishL2CAPChannel PSM: CBL2CAPPSM, error: Error?) {
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didPublishL2CAPChannel PSM: CBL2CAPPSM, error: Error?) {
         if let error = error {
             print("Error publishing channel: \(error.localizedDescription)")
             return
@@ -84,7 +84,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         
     }
     
-    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8) {
             request.value = characteristic.value
             print("Respond \(data)")
@@ -94,7 +94,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         }
     }
     
-    func peripheralManager(_ peripheral: CBPeripheralManager, didOpen channel: CBL2CAPChannel?, error: Error?) {
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didOpen channel: CBL2CAPChannel?, error: Error?) {
         
         if let error = error {
             print("Error opening channel: \(error.localizedDescription)")

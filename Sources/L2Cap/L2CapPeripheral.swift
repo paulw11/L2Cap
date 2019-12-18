@@ -16,8 +16,8 @@ public class L2CapPeripheral: NSObject {
         }
     }
     
-    private var service: CBMutableService
-    private var characteristic: CBMutableCharacteristic
+    private var service: CBMutableService?
+    private var characteristic: CBMutableCharacteristic?
     private var peripheralManager: CBPeripheralManager!
     private var subscribedCentrals = [CBCharacteristic:[CBCentral]]()
     private var channel: CBL2CAPChannel?
@@ -45,8 +45,8 @@ public class L2CapPeripheral: NSObject {
         }
         self.service = CBMutableService(type: Constants.serviceID, primary: true)
         self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
-        self.service.characteristics = [self.characteristic]
-        self.peripheralManager.add(self.service)
+        self.service?.characteristics = [self.characteristic!]
+        self.peripheralManager.add(self.service!)
         self.peripheralManager.publishL2CAPChannel(withEncryption: false)
         self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.serviceID]])
         
@@ -89,15 +89,15 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         
         if let data = "\(PSM)".data(using: .utf8) {
             
-            self.characteristic.value = data
+            self.characteristic?.value = data
             
-            self.peripheralManager.updateValue(data, for: self.characteristic, onSubscribedCentrals: self.subscribedCentrals[self.characteristic])
+            self.peripheralManager.updateValue(data, for: self.characteristic!, onSubscribedCentrals: self.subscribedCentrals[self.characteristic!])
         }
         
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8) {
+        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8), let characteristic = self.characteristic {
             request.value = characteristic.value
             print("Respond \(data)")
             self.peripheralManager.respond(to: request, withResult: .success)

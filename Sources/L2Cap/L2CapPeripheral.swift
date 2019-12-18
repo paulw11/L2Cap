@@ -97,7 +97,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8), let characteristic = self.characteristic` {
+        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8), let characteristic = self.characteristic {
             request.value = characteristic.value
             print("Respond \(data)")
             self.peripheralManager.respond(to: request, withResult: .success)

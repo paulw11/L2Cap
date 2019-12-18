@@ -99,6 +99,8 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
             return
         }
         
+        peripheral.delegate = self
+        
         for characteristic in service.characteristics ?? [] {
             print("Discovered characteristic \(characteristic)")
             if characteristic.uuid ==  Constants.PSMID {

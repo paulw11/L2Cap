@@ -37,6 +37,9 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
         }
     }
     
+    deinit {
+        print("Going away")
+    }
     
     
     public func send(data: Data) -> Void {

@@ -43,12 +43,12 @@ public class L2CapPeripheral: NSObject {
             self.unpublishService()
             return
         }
-        self.service = CBMutableService(type: Constants.serviceID, primary: true)
+        self.service = CBMutableService(type: Constants.psmServiceID, primary: true)
         self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
         self.service?.characteristics = [self.characteristic!]
         self.peripheralManager.add(self.service!)
         self.peripheralManager.publishL2CAPChannel(withEncryption: false)
-        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.serviceID]])
+        self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.psmServiceID]])
         
     }
     
@@ -97,7 +97,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8), let characteristic = self.characteristic {
+        if let psm = self.channelPSM, let data = "\(psm)".data(using: .utf8), let characteristic = self.characteristic` {
             request.value = characteristic.value
             print("Respond \(data)")
             self.peripheralManager.respond(to: request, withResult: .success)

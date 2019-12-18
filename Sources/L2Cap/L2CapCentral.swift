@@ -35,7 +35,7 @@ public class L2CapCentral: NSObject {
             return
         }
         if self.scan {
-            self.central.scanForPeripherals(withServices: [Constants.serviceID], options: nil)
+            self.central.scanForPeripherals(withServices: [Constants.psmServiceID], options: nil)
         } else {
             self.central.stopScan()
         }

@@ -94,7 +94,20 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
     private let connectionHandler: L2CapConnectionCallback
     
     func discover() {
-        self.peripheral.discoverServices([Constants.serviceID])
+        self.peripheral.discoverServices([Constants.psmServiceID])
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        if let error = error {
+            print("Service discovery error - \(error)")
+            return
+        }
+    
+        for service in peripheral.services ?? [] {
+            if service.uuid == Constants.psmServiceID {
+                peripheral.discoverCharacteristics([Constants.PSMID], for: service)
+            }
+        }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {

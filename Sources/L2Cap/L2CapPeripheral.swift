@@ -31,11 +31,10 @@ public class L2CapPeripheral: NSObject {
     
     public init(connectionHandler:  @escaping L2CapConnectionCallback) {
         
-        self.service = CBMutableService(type: Constants.serviceID, primary: true)
-        self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
+        
         self.connectionHandler = connectionHandler
         super.init()
-        self.service.characteristics = [self.characteristic]
+        
         self.peripheralManager = CBPeripheralManager(delegate: self, queue: managerQueue)
     }
     
@@ -44,7 +43,9 @@ public class L2CapPeripheral: NSObject {
             self.unpublishService()
             return
         }
-        
+        self.service = CBMutableService(type: Constants.serviceID, primary: true)
+        self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
+        self.service.characteristics = [self.characteristic]
         self.peripheralManager.add(self.service)
         self.peripheralManager.publishL2CAPChannel(withEncryption: false)
         self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.serviceID]])
@@ -57,6 +58,9 @@ public class L2CapPeripheral: NSObject {
         if let psm = self.channelPSM {
             self.peripheralManager.unpublishL2CAPChannel(psm)
         }
+        self.subscribedCentrals.removeAll()
+        self.characteristic = nil
+        self.service = nil
     }
 }
 

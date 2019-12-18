@@ -20,7 +20,6 @@ public class L2CapPeripheral: NSObject {
     private var characteristic: CBMutableCharacteristic?
     private var peripheralManager: CBPeripheralManager!
     private var subscribedCentrals = [CBCharacteristic:[CBCentral]]()
-    private var channel: CBL2CAPChannel?
     private var channelPSM: UInt16?
     private var managerQueue = DispatchQueue.global(qos: .utility)
     private var connectionHandler: L2CapConnectionCallback
@@ -112,8 +111,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
             print("Error opening channel: \(error.localizedDescription)")
             return
         }
-        self.channel = channel
-        if let channel = self.channel {
+        if let channel = channel {
             let connection = L2CapPeripheralConnection(channel: channel)
             self.connectionHandler(connection)
         }

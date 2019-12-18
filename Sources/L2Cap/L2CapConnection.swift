@@ -12,7 +12,8 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
     
     var channel: CBL2CAPChannel?
     
-    public var receiveCallback:L2CapReceiveData?
+    public var receiveCallback:L2CapReceiveDataCallback?
+    public var sentDataCallback: L2CapSentDataCallback?
     
     private var queueQueue = DispatchQueue(label: "queue queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem, target: nil)
     
@@ -57,6 +58,7 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
         let bytesWritten =  ostream.write(self.outputData)
         
         print("bytesWritten = \(bytesWritten)")
+        self.sentDataCallback?(self,bytesWritten)
         queueQueue.sync {
             if bytesWritten < outputData.count {
                 outputData = outputData.advanced(by: bytesWritten)

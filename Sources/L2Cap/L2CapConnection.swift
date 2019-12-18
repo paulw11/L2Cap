@@ -167,5 +167,12 @@ class L2CapPeripheralConnection: L2CapInternalConnection {
     init(channel: CBL2CAPChannel) {
         super.init()
         self.channel = channel
+        print("Opened channel \(channel)")
+        channel.inputStream.delegate = self
+        channel.outputStream.delegate = self
+        channel.inputStream.schedule(in: RunLoop.current, forMode: .default)
+        channel.outputStream.schedule(in: RunLoop.current, forMode: .default)
+        channel.inputStream.open()
+        channel.outputStream.open()
     }
 }

@@ -53,6 +53,10 @@ public class L2CapPeripheral: NSObject {
     
     private func unpublishService() {
         self.peripheralManager.stopAdvertising()
+        self.peripheralManager.removeAllServices()
+        if let psm = self.channelPSM {
+            self.peripheralManager.unpublishL2CAPChannel(psm)
+        }
     }
 }
 
@@ -102,7 +106,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         
         if let error = error {
             print("Error opening channel: \(error.localizedDescription)")
-           return
+            return
         }
         self.channel = channel
         if let channel = self.channel {

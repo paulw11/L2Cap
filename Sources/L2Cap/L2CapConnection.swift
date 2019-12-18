@@ -93,13 +93,15 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
     private var peripheral: CBPeripheral
     private let connectionHandler: L2CapConnectionCallback
     
+    func discover() {
+        self.peripheral.discoverServices([Constants.serviceID])
+    }
+    
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
             print("Characteristic discovery error - \(error)")
             return
         }
-        
-        peripheral.delegate = self
         
         for characteristic in service.characteristics ?? [] {
             print("Discovered characteristic \(characteristic)")

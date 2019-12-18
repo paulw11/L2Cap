@@ -61,10 +61,10 @@ extension L2CapCentral: CBCentralManagerDelegate {
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        guard let _ = self.pendingConnections[peripheral.identifier.uuidString] else {
+        guard let connection = self.pendingConnections[peripheral.identifier.uuidString] as? L2CapCentralConnection else {
             return
         }
-        peripheral.discoverServices([Constants.serviceID])
+        connection.discover()
     }
 }
 

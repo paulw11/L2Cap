@@ -23,7 +23,8 @@ public class L2CapCentral: NSObject {
       
     private var central:CBCentralManager!
     
-    private var connections = Dictionary<String,L2CapConnection>()
+    private var connections = Dictionary<UUID,L2CapConnection>()
+    private var discoveredPeripherals = Set<UUID>()
   
     
     override public init() {
@@ -45,7 +46,7 @@ public class L2CapCentral: NSObject {
     public func connect(peripheral: CBPeripheral, connectionHandler:  @escaping L2CapConnectionCallback)  {
         self.central.connect(peripheral)
         let l2Connection = L2CapCentralConnection(peripheral: peripheral, connectionCallback: connectionHandler)
-        self.connections[peripheral.identifier.uuidString] = l2Connection
+        self.connections[peripheral.identifier] = l2Connection
         
     }
 }
@@ -58,18 +59,22 @@ extension L2CapCentral: CBCentralManagerDelegate {
     }
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        guard !self.discoveredPeripherals.contains(peripheral.identifier) else {
+            return
+        }
+        self.discoveredPeripherals.insert(peripheral.identifier)
         self.discoveredPeripheralCallback?(peripheral)
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        guard let connection = self.connections[peripheral.identifier.uuidString] as? L2CapCentralConnection else {
+        guard let connection = self.connections[peripheral.identifier] as? L2CapCentralConnection else {
             return
         }
         connection.discover()
     }
     
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        guard let connection = self.connections[peripheral.identifier.uuidString] else {
+        guard let connection = self.connections[peripheral.identifier] else {
             return
         }
         self.disconnectedPeripheralCallBack?(connection,error)

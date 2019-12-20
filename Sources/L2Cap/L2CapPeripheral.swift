@@ -18,7 +18,7 @@ public class L2CapPeripheral: NSObject {
     
     private var service: CBMutableService?
     private var characteristic: CBMutableCharacteristic?
-    private var peripheralManager: CBPeripheralManager!
+    private var peripheralManager: CBPeripheralManager
     private var subscribedCentrals = [CBCharacteristic:[CBCentral]]()
     private var channelPSM: UInt16?
     private var managerQueue = DispatchQueue.global(qos: .utility)
@@ -32,9 +32,9 @@ public class L2CapPeripheral: NSObject {
         
         
         self.connectionHandler = connectionHandler
+        self.peripheralManager = CBPeripheralManager(delegate: nil, queue: managerQueue)
         super.init()
-        
-        self.peripheralManager = CBPeripheralManager(delegate: self, queue: managerQueue)
+        self.peripheralManager.delegate = self
     }
     
     private func publishService() {

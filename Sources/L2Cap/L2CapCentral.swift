@@ -12,7 +12,8 @@ public class L2CapCentral: NSObject {
 
     private var managerQueue = DispatchQueue.global(qos: .utility)
     
-    public var discoveredPeripheralCallback: DiscoveredPeripheralCallback?
+    public var discoveredPeripheralCallback: L2CapDiscoveredPeripheralCallback?
+    public var disconnectedPeripheralCallBack: L2CapDisconnectionCallback?
     
     public var scan: Bool = false {
         didSet {
@@ -22,7 +23,7 @@ public class L2CapCentral: NSObject {
       
     private var central:CBCentralManager!
     
-    private var pendingConnections = Dictionary<String,L2CapConnection>()
+    private var connections = Dictionary<String,L2CapConnection>()
   
     
     override public init() {
@@ -44,7 +45,7 @@ public class L2CapCentral: NSObject {
     public func connect(peripheral: CBPeripheral, connectionHandler:  @escaping L2CapConnectionCallback)  {
         self.central.connect(peripheral)
         let l2Connection = L2CapCentralConnection(peripheral: peripheral, connectionCallback: connectionHandler)
-        self.pendingConnections[peripheral.identifier.uuidString] = l2Connection
+        self.connections[peripheral.identifier.uuidString] = l2Connection
         
     }
 }
@@ -61,10 +62,17 @@ extension L2CapCentral: CBCentralManagerDelegate {
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        guard let connection = self.pendingConnections[peripheral.identifier.uuidString] as? L2CapCentralConnection else {
+        guard let connection = self.connections[peripheral.identifier.uuidString] as? L2CapCentralConnection else {
             return
         }
         connection.discover()
+    }
+    
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        guard let connection = self.connections[peripheral.identifier.uuidString] else {
+            return
+        }
+        self.disconnectedPeripheralCallBack?(connection,error)
     }
 }
 

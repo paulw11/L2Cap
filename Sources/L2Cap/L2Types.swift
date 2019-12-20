@@ -9,9 +9,10 @@ import Foundation
 import CoreBluetooth
 
 
-public typealias DiscoveredPeripheralCallback = (CBPeripheral)->Void
-public typealias StateCallback = (CBManagerState)->Void
+public typealias L2CapDiscoveredPeripheralCallback = (CBPeripheral)->Void
+public typealias L2CapStateCallback = (CBManagerState)->Void
 public typealias L2CapConnectionCallback = (L2CapConnection)->Void
+public typealias L2CapDisconnectionCallback = (L2CapConnection,Error?)->Void
 public typealias L2CapReceiveDataCallback = (L2CapConnection,Data)->Void
 public typealias L2CapSentDataCallback = (L2CapConnection, Int)->Void
 

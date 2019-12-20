@@ -160,8 +160,8 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
         channel.inputStream.delegate = self
         channel.outputStream.delegate = self
         print("Opened channel \(channel)")
-        channel.inputStream.schedule(in: RunLoop.current, forMode: .default)
-        channel.outputStream.schedule(in: RunLoop.current, forMode: .default)
+        channel.inputStream.schedule(in: RunLoop.main, forMode: .default)
+        channel.outputStream.schedule(in: RunLoop.main, forMode: .default)
         channel.inputStream.open()
         channel.outputStream.open()
         self.connectionHandler(self)

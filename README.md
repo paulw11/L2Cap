@@ -6,7 +6,7 @@ Implements L2Cap channel capability in Core Bluetooth.
 
 Instantiate `L2CapCentral` to discover and connect to peripherals
 
-```
+```Swift
     self.l2capCentral = L2CapCentral()
     
     self.l2capCentral.discoveredPeripheralCallback = { peripheral in
@@ -15,11 +15,11 @@ Instantiate `L2CapCentral` to discover and connect to peripherals
             self.connection = connection
             
             self.connection?.receiveCallback = { (connection,data) in
-                   print("Received data")
+                print("Received data")
             }
             
             self.connection?.sentDataCallback = { (connection, count) in
-                prnit("\(count) bytes sent")
+                pring("\(count) bytes sent")
             }
         }
     }

@@ -19,7 +19,7 @@ Instantiate `L2CapCentral` to discover and connect to peripherals
             }
             
             self.connection?.sentDataCallback = { (connection, count) in
-                pring("\(count) bytes sent")
+                print("\(count) bytes sent")
             }
         }
     }

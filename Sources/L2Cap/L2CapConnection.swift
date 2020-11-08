@@ -137,7 +137,8 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
             return
         }
         
-        if let dataValue = characteristic.value, let psm = dataValue.uint16 {
+        if let dataValue = characteristic.value {
+            let psm = dataValue.uint16
             print("Opening channel \(psm)")
             self.peripheral.openL2CAPChannel(psm)
         } else {

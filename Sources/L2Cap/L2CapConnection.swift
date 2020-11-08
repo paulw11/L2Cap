@@ -137,9 +137,7 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
             return
         }
         
-        print("Read characteristic \(characteristic)")
-        
-        if let dataValue = characteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
+        if let dataValue = characteristic.value, let psm = dataValue.uint16 {
             print("Opening channel \(psm)")
             self.peripheral.openL2CAPChannel(psm)
         } else {
@@ -155,11 +153,9 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
         guard let channel = channel else {
             return
         }
-        print("Opened channel \(channel)")
         self.channel = channel
         channel.inputStream.delegate = self
         channel.outputStream.delegate = self
-        print("Opened channel \(channel)")
         channel.inputStream.schedule(in: RunLoop.main, forMode: .default)
         channel.outputStream.schedule(in: RunLoop.main, forMode: .default)
         channel.inputStream.open()
@@ -172,7 +168,6 @@ class L2CapPeripheralConnection: L2CapInternalConnection {
     init(channel: CBL2CAPChannel) {
         super.init()
         self.channel = channel
-        print("Opened channel \(channel)")
         channel.inputStream.delegate = self
         channel.outputStream.delegate = self
         channel.inputStream.schedule(in: RunLoop.main, forMode: .default)

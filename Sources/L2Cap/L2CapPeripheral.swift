@@ -16,13 +16,24 @@ public class L2CapPeripheral: NSObject {
         }
     }
     
+    public var publishChannel: Bool = false {
+        didSet {
+            self.publishL2CAPChannel()
+        }
+    }
+    
     private var service: CBMutableService?
     private var characteristic: CBMutableCharacteristic?
     private var peripheralManager: CBPeripheralManager
     private var subscribedCentrals = [CBCharacteristic:[CBCentral]]()
-    private var channelPSM: UInt16?
+    private var channelPSM: UInt16? {
+        didSet {
+            self.updatePSM()
+        }
+    }
     private var managerQueue = DispatchQueue.global(qos: .utility)
     private var connectionHandler: L2CapConnectionCallback
+    private var connection: L2CapConnection?
     
     public override init() {
         fatalError("Call init(connectionHandler:)")
@@ -46,17 +57,32 @@ public class L2CapPeripheral: NSObject {
         self.characteristic = CBMutableCharacteristic(type: Constants.PSMID, properties: [ CBCharacteristicProperties.read, CBCharacteristicProperties.indicate], value: nil, permissions: [CBAttributePermissions.readable] )
         self.service?.characteristics = [self.characteristic!]
         self.peripheralManager.add(self.service!)
-        self.peripheralManager.publishL2CAPChannel(withEncryption: false)
+       
         self.peripheralManager.startAdvertising([CBAdvertisementDataServiceUUIDsKey : [Constants.psmServiceID]])
-        
+        self.publishChannel = true
+    }
+    
+    private func publishL2CAPChannel() {
+        guard self.channelPSM == nil, publishChannel else {
+            self.unpublishL2CAPChannel()
+            return
+        }
+        self.peripheralManager.publishL2CAPChannel(withEncryption: false)
+    }
+    
+    private func unpublishL2CAPChannel() {
+        guard let psm = self.channelPSM, !publishChannel else {
+            return
+        }
+        self.connection?.close()
+        self.peripheralManager.unpublishL2CAPChannel(psm)
+        self.channelPSM = nil
     }
     
     private func unpublishService() {
+        self.publishChannel = false
         self.peripheralManager.stopAdvertising()
         self.peripheralManager.removeAllServices()
-        if let psm = self.channelPSM {
-            self.peripheralManager.unpublishL2CAPChannel(psm)
-        }
         self.subscribedCentrals.removeAll()
         self.characteristic = nil
         self.service = nil
@@ -86,9 +112,7 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         
         self.channelPSM = PSM
         
-        self.characteristic?.value = PSM.data
-        
-        self.peripheralManager.updateValue(PSM.data, for: self.characteristic!, onSubscribedCentrals: self.subscribedCentrals[self.characteristic!])
+       
     }
     
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
@@ -108,8 +132,18 @@ extension L2CapPeripheral: CBPeripheralManagerDelegate {
         }
         if let channel = channel {
             let connection = L2CapPeripheralConnection(channel: channel)
+            self.connection = connection
             self.connectionHandler(connection)
         }
+    }
+    
+    private func updatePSM() {
+        
+        self.characteristic?.value = self.channelPSM?.data
+        
+        let value = self.channelPSM?.data ?? Data()
+        
+        self.peripheralManager.updateValue(value, for: self.characteristic!, onSubscribedCentrals: self.subscribedCentrals[self.characteristic!])
     }
     
 }

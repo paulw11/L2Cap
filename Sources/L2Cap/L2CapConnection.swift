@@ -14,6 +14,7 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
     
     public var receiveCallback:L2CapReceiveDataCallback?
     public var sentDataCallback: L2CapSentDataCallback?
+    public var stateChangeCallback: L2CapStateChangeCallback?
     
     private var queueQueue = DispatchQueue(label: "queue queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem, target: nil)
     
@@ -36,6 +37,7 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
         default:
             print("Unknown stream event")
         }
+        self.stateChangeCallback?(self,eventCode)
     }
     
     deinit {
@@ -66,6 +68,17 @@ class L2CapInternalConnection: NSObject, StreamDelegate, L2CapConnection {
                 outputData.removeAll()
             }
         }
+    }
+    
+    public func close() {
+        self.channel?.outputStream.close()
+        self.channel?.inputStream.close()
+        self.channel?.inputStream.remove(from: .main, forMode: .default)
+        self.channel?.outputStream.remove(from: .main, forMode: .default)
+        
+        self.channel?.inputStream.delegate = nil
+        self.channel?.outputStream.delegate = nil
+        self.channel = nil
     }
     
     private func readBytes(from stream: InputStream) {
@@ -137,7 +150,7 @@ class L2CapCentralConnection: L2CapInternalConnection, CBPeripheralDelegate {
             return
         }
         
-        if let dataValue = characteristic.value {
+        if let dataValue = characteristic.value, !dataValue.isEmpty {
             let psm = dataValue.uint16
             print("Opening channel \(psm)")
             self.peripheral.openL2CAPChannel(psm)
